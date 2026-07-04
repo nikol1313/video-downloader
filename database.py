@@ -1,26 +1,19 @@
-from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, declarative_base
+from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
+from sqlalchemy.orm import DeclarativeBase
 from envpy import env
 
-Base = declarative_base()
+class Base(DeclarativeBase):
+    pass
 
-try:
-    engine = create_engine(env.DATABASE)
-    with engine.connect() as conn:
-        conn.exec_driver_sql("SELECT 1")
-except SQLAlchemyError as e:
-    raise RuntimeError(f"Database connection failed: {e}")
+engine = create_async_engine(env.DATABASE)
 
-SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
+AsyncSessionLocal = async_sessionmaker(engine, expire_on_commit=False)
 
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-        db.commit()
-    except Exception:
-        db.rollback()
-        raise
-    finally:
-        db.close()
+async def get_db():
+    async with AsyncSessionLocal() as session:
+        try:
+            yield session
+            await session.commit()
+        except Exception:
+            await session.rollback()
+            raise
