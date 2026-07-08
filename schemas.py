@@ -19,12 +19,12 @@ class VideoCreate(VideoBase):
 
     @model_validator(mode='after')
     def validate_path(self) -> 'VideoCreate':
-        if self.file_path and not  os.path.exists(self.file_path):
+        if self.file_path and self.file_path != "pending" and not os.path.exists(self.file_path):
             raise ValueError("Path not found on disk")
         return self
 
 class VideoSchema(VideoBase):
     id: int
-    created_at: datetime = Field(default_factory=datetime.now())
+    created_at: datetime = Field(default_factory=datetime.now)
 
     model_config = ConfigDict(from_attributes=True)
