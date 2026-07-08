@@ -1,9 +1,5 @@
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
-from sqlalchemy.orm import DeclarativeBase
 from envpy import env
-
-class Base(DeclarativeBase):
-    pass
 
 engine = create_async_engine(env.DATABASE)
 
