@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Async Video Downloader — Test Page</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --panel: #1e293b;
+      --accent: #38bdf8;
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+      --ok: #22c55e;
+      --err: #ef4444;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      justify-content: center;
+      padding: 32px 16px;
+      min-height: 100vh;
+    }
+    .container { width: 100%; max-width: 560px; }
+    h1 { font-size: 1.4rem; margin: 0 0 4px; }
+    p.sub { color: var(--muted); margin: 0 0 24px; font-size: 0.9rem; }
+    .card {
+      background: var(--panel);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+    }
+    label { display: block; font-size: 0.85rem; margin: 12px 0 4px; color: var(--muted); }
+    input, select {
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #334155;
+      background: #0f172a;
+      color: var(--text);
+      font-size: 0.95rem;
+    }
+    .row { display: flex; gap: 10px; align-items: end; }
+    .row > * { flex: 1; }
+    button {
+      margin-top: 14px;
+      padding: 10px 16px;
+      border: none;
+      border-radius: 8px;
+      background: var(--accent);
+      color: #0f172a;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 0.95rem;
+    }
+    button:hover { filter: brightness(1.1); }
+    button.secondary { background: #475569; color: var(--text); }
+    a.dl {
+      display: inline-block;
+      margin-top: 14px;
+      padding: 10px 16px;
+      border-radius: 8px;
+      background: var(--ok);
+      color: #0f172a;
+      font-weight: 600;
+      text-decoration: none;
+    }
+    .msg { margin-top: 14px; padding: 10px; border-radius: 8px; font-size: 0.9rem; white-space: pre-wrap; word-break: break-word; }
+    .msg.ok { background: rgba(34,197,94,0.15); border: 1px solid var(--ok); }
+    .msg.err { background: rgba(239,68,68,0.15); border: 1px solid var(--err); }
+    .msg.info { background: rgba(56,189,248,0.12); border: 1px solid var(--accent); }
+    dl { margin: 8px 0 0; display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; font-size: 0.9rem; }
+    dt { color: var(--muted); }
+    dd { margin: 0; word-break: break-word; }
+    .hint { color: var(--muted); font-size: 0.78rem; margin-top: 6px; }
+    .autopoll { display: flex; align-items: center; gap: 6px; margin-top: 12px; font-size: 0.85rem; color: var(--muted); }
+    .autopoll input { width: auto; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Async Video Downloader</h1>
+    <p class="sub">Simple page to test the API endpoints.</p>
+
+    <div class="card">
+      <h2 style="font-size:1.05rem;margin:0 0 8px;">1. Start a download</h2>
+      <label for="url">Video URL</label>
+      <input id="url" type="text" placeholder="https://www.youtube.com/watch?v=..." />
+
+      <div>
+        <label for="quality">Quality</label>
+        <select id="quality">
+          <option value="360p">360p</option>
+          <option value="720p" selected>720p</option>
+          <option value="1080p">1080p</option>
+        </select>
+      </div>
+
+      <button id="startBtn">Start download</button>
+      <div id="startMsg"></div>
+    </div>
+
+    <div class="card">
+      <h2 style="font-size:1.05rem;margin:0 0 8px;">2. Check status</h2>
+      <label for="jobId">Job ID</label>
+      <input id="jobId" type="number" placeholder="e.g. 1" />
+
+      <div class="row">
+        <button id="statusBtn">Check status</button>
+      </div>
+
+      <div class="autopoll">
+        <input id="autoPoll" type="checkbox" />
+        <label for="autoPoll" style="margin:0;">Auto-refresh every 3s</label>
+      </div>
+
+      <div id="statusMsg"></div>
+    </div>
+
+    <div class="card">
+      <h2 style="font-size:1.05rem;margin:0 0 8px;">3. Download the file</h2>
+      <p class="hint">Uses the Job ID above. Server returns an error message if the file is not ready.</p>
+      <button id="downloadBtn">Download file</button>
+      <div id="downloadMsg"></div>
+    </div>
+  </div>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+
+    function setMsg(el, text, kind) {
+      el.className = "msg " + (kind || "info");
+      el.textContent = text;
+    }
+
+    $("startBtn").addEventListener("click", async () => {
+      const url = $("url").value.trim();
+      const quality = $("quality").value;
+      const msg = $("startMsg");
+
+      if (!url) {
+        setMsg(msg, "Please enter a video URL.", "err");
+        return;
+      }
+
+      const params = new URLSearchParams({ url, quality });
+
+      setMsg(msg, "Submitting…", "info");
+      try {
+        const res = await fetch(`/videos?${params.toString()}`, { method: "POST" });
+        const data = await res.json();
+        if (!res.ok) {
+          setMsg(msg, `Error ${res.status}: ${data.detail || JSON.stringify(data)}`, "err");
+          return;
+        }
+        setMsg(msg, `Job started! ID = ${data.id} (status: ${data.status}). It's now filled into the Job ID field.`, "ok");
+        $("jobId").value = data.id;
+      } catch (e) {
+        setMsg(msg, "Network error: " + e.message, "err");
+      }
+    });
+
+    let pollTimer = null;
+
+    async function checkStatus() {
+      const jobId = $("jobId").value.trim();
+      const msg = $("statusMsg");
+      if (!jobId) {
+        setMsg(msg, "Please enter a Job ID.", "err");
+        return;
+      }
+      try {
+        const res = await fetch(`/videos/${jobId}`);
+        const data = await res.json();
+        if (!res.ok) {
+          setMsg(msg, `Error ${res.status}: ${data.detail || JSON.stringify(data)}`, "err");
+          return;
+        }
+
+        let durationText = "N/A";
+        if (data.duration !== null && data.duration !== undefined) {
+          const minutes = Math.floor(data.duration / 60);
+          const seconds = data.duration % 60;
+          durationText = `${minutes}:${String(seconds).padStart(2, '0')}`;
+        }
+
+
+        msg.className = "msg ok";
+        msg.innerHTML = `<dl>
+          <dt>ID</dt><dd>${data.id}</dd>
+          <dt>Title</dt><dd>${data.title ?? ""}</dd>
+          <dt>Duration</dt><dd>${durationText}</dd>
+          <dt>Status</dt><dd>${data.status ?? ""}</dd>
+          <dt>URL</dt><dd>${data.url ?? ""}</dd>
+          <dt>Created</dt><dd>${data.created_at ?? ""}</dd>
+        </dl>`;
+      } catch (e) {
+        setMsg(msg, "Network error: " + e.message, "err");
+      }
+    }
+
+    $("statusBtn").addEventListener("click", checkStatus);
+
+    $("autoPoll").addEventListener("change", (e) => {
+      if (e.target.checked) {
+        checkStatus();
+        pollTimer = setInterval(checkStatus, 3000);
+      } else if (pollTimer) {
+        clearInterval(pollTimer);
+        pollTimer = null;
+      }
+    });
+
+    $("downloadBtn").addEventListener("click", async () => {
+      const jobId = $("jobId").value.trim();
+      const msg = $("downloadMsg");
+      if (!jobId) {
+        setMsg(msg, "Please enter a Job ID.", "err");
+        return;
+      }
+      try {
+        const res = await fetch(`/download/${jobId}`);
+        if (!res.ok) {
+          let detail = res.statusText;
+          try { detail = (await res.json()).detail || detail; } catch (_) {}
+          setMsg(msg, `Error ${res.status}: ${detail}`, "err");
+          return;
+        }
+        const blob = await res.blob();
+        const objectUrl = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = objectUrl;
+        a.download = `${jobId}`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(objectUrl);
+        setMsg(msg, "Download started.", "ok");
+      } catch (e) {
+        setMsg(msg, "Network error: " + e.message, "err");
+      }
+    });
+  </script>
+</body>
+</html>

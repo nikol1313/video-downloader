@@ -1,0 +1,5 @@
+2026-07-09 16:01:43,487 - service - INFO - processed video 1
+2026-07-09 16:15:01,981 - service - ERROR - Download Error for 2: [0;31mERROR:[0m unable to download video data: HTTP Error 403: Forbidden
+2026-07-09 16:19:08,886 - service - INFO - processed video 3
+2026-07-09 16:25:24,255 - service - INFO - processed video 4
+2026-07-09 16:44:09,612 - service - INFO - processed video 1
