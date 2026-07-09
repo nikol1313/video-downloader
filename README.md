@@ -12,7 +12,7 @@ A simple async video downloader built with FastAPI, SQLAlchemy, and yt-dlp.
 
 ## Installation
 
-### Using Docker (Recommended)
+### Using Docker
 
 1. Set up environment variables `.env`:
 ```
