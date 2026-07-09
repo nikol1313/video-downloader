@@ -13,6 +13,7 @@ class VideoBase(BaseModel):
     url: HttpUrl
     status: Quality = Field(default=Quality.NORMAL, description="Quality of Video")
     title: str = Field(min_length=1 , max_length=255)
+    duration: Optional[int] = Field(default=None, description="Video length in seconds")
 
 class VideoCreate(VideoBase):
     file_path: Optional[str]

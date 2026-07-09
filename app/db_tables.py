@@ -15,6 +15,8 @@ class Video(Base):
 
     file_path: Mapped[str] = mapped_column(String, nullable=False)
 
+    duration: Mapped[int | None] = mapped_column(Integer, nullable=True)
+
     created_at: Mapped[datetime | None] = mapped_column(DateTime, server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now(), onupdate=func.now())
 

@@ -2,12 +2,12 @@ from sqlalchemy import desc
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.exc import SQLAlchemyError
-from db_tables import Video
-from schemas import VideoCreate
+from app.db_tables import Video
+from app.schemas import VideoCreate
 
 async def create_video(db: AsyncSession, video: VideoCreate) -> Video | None:
     try:
-        db_video = Video(**video.model_dump())
+        db_video = Video(**video.model_dump(mode="json"))
         db.add(db_video)
         await db.commit()
         await db.refresh(db_video)
