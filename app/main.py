@@ -1,4 +1,5 @@
 import os
+import asyncio
 from contextlib import asynccontextmanager
 from pathlib import Path
 from fastapi import FastAPI, Depends, BackgroundTasks, HTTPException
@@ -16,8 +17,7 @@ from app.db_tables import Base
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    import asyncio
-    max_retries = 5
+    max_retries = 3
     retry_delay = 2
     
     for attempt in range(max_retries):
