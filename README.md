@@ -20,6 +20,7 @@ An asynchronous video downloader built with FastAPI, SQLAlchemy, PostgreSQL, and
 ```env
 DATABASE=postgresql+asyncpg://user:password@db:5432/app
 ```
+and also put this .env in alembic.ini `sqlalchemy.url =`
 
 2. Build and start the application:
 
