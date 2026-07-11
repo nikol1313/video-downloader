@@ -32,9 +32,7 @@ The application will be available at **http://localhost:8080**.
 
 ## AI
 
-This project was developed by me, with AI used as a development aid. Specifically:
-
-* The simple static index.html was generated with AI and then integrated into the application.
+* The simple static index.html was generated with AI and then integrated into the application, because i have no interest making frontend.
 * AI was used to assist with debugging, troubleshooting during development.
 
 All backend architecture, API design, database integration, Docker configuration, and application logic were implemented by me.
