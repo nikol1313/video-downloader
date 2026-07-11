@@ -28,8 +28,8 @@ services:
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U user -d app"]
       interval: 3s
-      timeout: 5s
-      retries: 10
+      timeout: 10s
+      retries: 5
 
 networks:
   app-network:

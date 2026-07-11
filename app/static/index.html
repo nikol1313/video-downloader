@@ -128,6 +128,12 @@
       <button id="downloadBtn">Download file</button>
       <div id="downloadMsg"></div>
     </div>
+
+    <div class="card">
+      <h2 style="font-size:1.05rem;margin:0 0 8px;">4. Recent jobs</h2>
+      <button id="jobsBtn" class="secondary">Refresh jobs</button>
+      <div id="jobsMsg"></div>
+    </div>
   </div>
 
   <script>
@@ -158,7 +164,7 @@
           setMsg(msg, `Error ${res.status}: ${data.detail || JSON.stringify(data)}`, "err");
           return;
         }
-        setMsg(msg, `Job started! ID = ${data.id} (status: ${data.status}). It's now filled into the Job ID field.`, "ok");
+        setMsg(msg, `Job started! ID = ${data.id} (${data.quality}, ${data.status}). It's now filled into the Job ID field.`, "ok");
         $("jobId").value = data.id;
       } catch (e) {
         setMsg(msg, "Network error: " + e.message, "err");
@@ -194,8 +200,10 @@
         msg.innerHTML = `<dl>
           <dt>ID</dt><dd>${data.id}</dd>
           <dt>Title</dt><dd>${data.title ?? ""}</dd>
+          <dt>Quality</dt><dd>${data.quality ?? ""}</dd>
           <dt>Duration</dt><dd>${durationText}</dd>
           <dt>Status</dt><dd>${data.status ?? ""}</dd>
+          <dt>Error</dt><dd>${data.error_message ?? ""}</dd>
           <dt>URL</dt><dd>${data.url ?? ""}</dd>
           <dt>Created</dt><dd>${data.created_at ?? ""}</dd>
         </dl>`;
@@ -241,6 +249,31 @@
         a.remove();
         URL.revokeObjectURL(objectUrl);
         setMsg(msg, "Download started.", "ok");
+      } catch (e) {
+        setMsg(msg, "Network error: " + e.message, "err");
+      }
+    });
+
+    $("jobsBtn").addEventListener("click", async () => {
+      const msg = $("jobsMsg");
+      try {
+        const res = await fetch("/videos");
+        const data = await res.json();
+        if (!res.ok) {
+          setMsg(msg, `Error ${res.status}: ${data.detail || JSON.stringify(data)}`, "err");
+          return;
+        }
+        if (!data.length) {
+          setMsg(msg, "No jobs found.", "info");
+          return;
+        }
+        msg.className = "msg ok";
+        msg.innerHTML = data.map((job) => `<dl>
+          <dt>ID</dt><dd>${job.id}</dd>
+          <dt>Title</dt><dd>${job.title ?? ""}</dd>
+          <dt>Quality</dt><dd>${job.quality ?? ""}</dd>
+          <dt>Status</dt><dd>${job.status ?? ""}</dd>
+        </dl>`).join("");
       } catch (e) {
         setMsg(msg, "Network error: " + e.message, "err");
       }

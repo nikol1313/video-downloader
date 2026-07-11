@@ -5,6 +5,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from app.db_tables import Video
 from app.database import AsyncSessionLocal
 from app.log_conf import get_logger
+from app.schemas import VideoStatus
 
 logger = get_logger(__name__)
 
@@ -25,7 +26,21 @@ def get_video_quality_options(url: str):
 
 async def download_and_process_video(video_id: int, url: str, selected_quality: str):
     async with AsyncSessionLocal() as db:
+        async def mark_failed(message: str):
+            await db.rollback()
+            video = await db.get(Video, video_id)
+            if video:
+                video.status = VideoStatus.FAILED.value
+                video.error_message = message[:500]
+                await db.commit()
+
         try:
+            video = await db.get(Video, video_id)
+            if video:
+                video.status = VideoStatus.DOWNLOADING.value
+                video.error_message = None
+                await db.commit()
+
             download_path = "./downloads"
             if not os.path.isabs(download_path):
                 app_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -46,15 +61,14 @@ async def download_and_process_video(video_id: int, url: str, selected_quality: 
             def download():
                 with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                     info = ydl.extract_info(url, download=True)
-                    return ydl.prepare_filename(info), info.get('title'), info.get('duration')
+                    return info.get('title'), info.get('duration')
 
-            file_path, video_title, video_duration = await loop.run_in_executor(None, download)
-            file_path = os.path.abspath(file_path)
+            video_title, video_duration = await loop.run_in_executor(None, download)
 
             video = await db.get(Video, video_id)
             if video:
-                video.status = selected_quality
-                video.file_path = file_path
+                video.status = VideoStatus.COMPLETED.value
+                video.error_message = None
                 if video_title:
                     video.title = video_title[:255]
                 if video_duration is not None:
@@ -66,13 +80,13 @@ async def download_and_process_video(video_id: int, url: str, selected_quality: 
 
         except yt_dlp.utils.DownloadError as e:
             logger.error(f"Download Error for {video_id}: {e}")
-            await db.rollback()
+            await mark_failed(str(e))
         except OSError as e:
             logger.error(f"filesystem error for video {video_id}: {e}")
-            await db.rollback()
+            await mark_failed(str(e))
         except SQLAlchemyError as e:
             logger.error(f"Database error for video {video_id}: {e}")
             await db.rollback()
         except Exception as e:
             logger.error(f"Unexpected error for video {video_id}: {e}")
-            await db.rollback()
+            await mark_failed(str(e))

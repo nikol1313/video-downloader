@@ -7,8 +7,8 @@ from fastapi.staticfiles import StaticFiles
 from sqlalchemy.ext.asyncio import AsyncSession
 
 
-from app.schemas import VideoCreate, VideoSchema, Quality
-from app.db_crud import create_video, get_video
+from app.schemas import VideoCreate, VideoSchema, Quality, VideoStatus
+from app.db_crud import create_video, get_video, get_videos
 from app.service import download_and_process_video
 from app.database import get_db, engine
 from app.db_tables import Base
@@ -54,9 +54,9 @@ async def start_video_download(
 ):
     initial_video_data = VideoCreate(
         url=url,
-        status=quality.value,
+        quality=quality,
+        status=VideoStatus.QUEUED,
         title="Downloading...",
-        file_path="pending"
     )
     db_video = await create_video(db, initial_video_data)
     if not db_video:
@@ -72,6 +72,11 @@ async def start_video_download(
     return db_video
 
 
+@app.get("/videos", response_model=list[VideoSchema])
+async def list_video_jobs(skip: int = 0, limit: int = 10, db: AsyncSession = Depends(get_db)):
+    return await get_videos(db, skip=skip, limit=limit)
+
+
 @app.get("/videos/{job_id}", response_model=VideoSchema)
 async def get_job_status(job_id: int, db: AsyncSession = Depends(get_db)):
     video = await get_video(db, video_id=job_id)
@@ -84,13 +89,18 @@ async def download_video_file(job_id: int, db: AsyncSession = Depends(get_db)):
     video = await get_video(db, video_id=job_id)
     if not video:
         raise HTTPException(status_code=404, detail="Video job not found.")
-    if video.file_path == "pending":
+    if video.status != VideoStatus.COMPLETED.value:
         raise HTTPException(status_code=400, detail="Video is still processing or the download failed. Check GET /videos/{job_id}.")
-    if not os.path.exists(video.file_path):
-        raise HTTPException(status_code=404, detail=f"File not found on disk: {video.file_path}")
+    
+    download_path = Path(__file__).resolve().parent.parent / "downloads"
+    matching_files = list(download_path.glob(f"{job_id}.*"))
+    if not matching_files:
+        raise HTTPException(status_code=404, detail="Video file not found on disk.")
+    
+    video_file = matching_files[0]
     return FileResponse(
-        path=video.file_path,
-        filename=os.path.basename(video.file_path),
+        path=str(video_file),
+        filename=video_file.name,
         media_type="video/mp4"
     )
 
