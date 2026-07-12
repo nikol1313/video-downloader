@@ -1,9 +1,11 @@
-sqlalchemy~=2.0.51
-pydantic~=2.13.4
-uvicorn~=0.51.0
-fastapi~=0.139.0
-pydantic-settings~=2.14.2
-yt-dlp~=2026.7.4
-asyncpg~=0.30.0
-greenlet~=3.1.1
+sqlalchemy
+pydantic
+uvicorn
+fastapi
+pydantic-settings
+yt-dlp
+asyncpg
+greenlet
+ruff
+Black
 
