@@ -2,7 +2,7 @@ from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 from app.envpy import env
 
 engine = create_async_engine(
-    env.DATABASE,
+    env.database_url,
     pool_pre_ping=True,
     pool_recycle=3600,
     connect_args={
