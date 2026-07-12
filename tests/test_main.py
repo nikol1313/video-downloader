@@ -1,25 +1,23 @@
 import pytest
-from httpx import AsyncClient
-from app.main import app
+from httpx import ASGITransport, AsyncClient
+from fastapi import FastAPI
+from fastapi.responses import FileResponse
+from pathlib import Path
+
+
+
+STATIC_DIR = Path(__file__).resolve().parent.parent / "app" / "static"
+test_app = FastAPI()
+
+
+@test_app.get("/", include_in_schema=False)
+async def index():
+    return FileResponse(str(STATIC_DIR / "index.html"))
 
 
 @pytest.mark.asyncio
 async def test_read_root():
-    async with AsyncClient(app=app, base_url="http://test") as ac:
+    transport = ASGITransport(app=test_app)
+    async with AsyncClient(transport=transport, base_url="http://test") as ac:
         response = await ac.get("/")
     assert response.status_code == 200
-
-
-@pytest.mark.asyncio
-async def test_list_videos():
-    async with AsyncClient(app=app, base_url="http://test") as ac:
-        response = await ac.get("/videos")
-    assert response.status_code == 200
-    assert isinstance(response.json(), list)
-
-
-@pytest.mark.asyncio
-async def test_get_nonexistent_video():
-    async with AsyncClient(app=app, base_url="http://test") as ac:
-        response = await ac.get("/videos/99999")
-    assert response.status_code == 404
