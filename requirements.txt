@@ -8,4 +8,7 @@ asyncpg
 greenlet
 ruff
 mypy
+pytest
+pytest-asyncio
+httpx
 Black
