@@ -18,7 +18,7 @@ from app.db_tables import Base
 async def lifespan(app: FastAPI):
     max_retries = 3
     retry_delay = 2
-    
+
     for attempt in range(max_retries):
         try:
             async with engine.begin() as conn:
@@ -46,10 +46,10 @@ async def index():
 
 @app.post("/videos", response_model=VideoSchema)
 async def start_video_download(
-        url: str,
-        quality: Quality,
-        background_tasks: BackgroundTasks,
-        db: AsyncSession = Depends(get_db)
+    url: str,
+    quality: Quality,
+    background_tasks: BackgroundTasks,
+    db: AsyncSession = Depends(get_db),
 ):
     initial_video_data = VideoCreate(
         url=url,
@@ -65,14 +65,16 @@ async def start_video_download(
         download_and_process_video,
         video_id=db_video.id,
         url=url,
-        selected_quality=quality.value
+        selected_quality=quality.value,
     )
 
     return db_video
 
 
 @app.get("/videos", response_model=list[VideoSchema])
-async def list_video_jobs(skip: int = 0, limit: int = 10, db: AsyncSession = Depends(get_db)):
+async def list_video_jobs(
+    skip: int = 0, limit: int = 10, db: AsyncSession = Depends(get_db)
+):
     return await get_videos(db, skip=skip, limit=limit)
 
 
@@ -83,26 +85,30 @@ async def get_job_status(job_id: int, db: AsyncSession = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Video job not found.")
     return video
 
+
 @app.get("/download/{job_id}")
 async def download_video_file(job_id: int, db: AsyncSession = Depends(get_db)):
     video = await get_video(db, video_id=job_id)
     if not video:
         raise HTTPException(status_code=404, detail="Video job not found.")
     if video.status != VideoStatus.COMPLETED.value:
-        raise HTTPException(status_code=400, detail="Video is still processing or the download failed. Check GET /videos/{job_id}.")
-    
+        raise HTTPException(
+            status_code=400,
+            detail="Video is still processing or the download failed. Check GET /videos/{job_id}.",
+        )
+
     download_path = Path(__file__).resolve().parent.parent / "downloads"
     matching_files = list(download_path.glob(f"{job_id}.*"))
     if not matching_files:
         raise HTTPException(status_code=404, detail="Video file not found on disk.")
-    
+
     video_file = matching_files[0]
     return FileResponse(
-        path=str(video_file),
-        filename=video_file.name,
-        media_type="video/mp4"
+        path=str(video_file), filename=video_file.name, media_type="video/mp4"
     )
+
 
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run(app, host="0.0.0.0", port=8080)

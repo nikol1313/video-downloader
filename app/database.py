@@ -5,13 +5,11 @@ engine = create_async_engine(
     env.database_url,
     pool_pre_ping=True,
     pool_recycle=3600,
-    connect_args={
-        "timeout": 30,
-        "command_timeout": 30
-    }
+    connect_args={"timeout": 30, "command_timeout": 30},
 )
 
 AsyncSessionLocal = async_sessionmaker(engine, expire_on_commit=False)
+
 
 async def get_db():
     async with AsyncSessionLocal() as session:

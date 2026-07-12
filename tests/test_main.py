@@ -1,10 +1,9 @@
 from pathlib import Path
+
 import pytest
 from fastapi import FastAPI
 from fastapi.responses import FileResponse
 from httpx import ASGITransport, AsyncClient
-
-
 
 STATIC_DIR = Path(__file__).resolve().parent.parent / "app" / "static"
 test_app = FastAPI()

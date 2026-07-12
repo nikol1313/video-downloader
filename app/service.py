@@ -9,13 +9,14 @@ from app.schemas import VideoStatus
 
 logger = get_logger(__name__)
 
+
 def get_video_quality_options(url: str):
     try:
-        with yt_dlp.YoutubeDL({'quiet': True}) as ydl:
+        with yt_dlp.YoutubeDL({"quiet": True}) as ydl:
             info_dict = ydl.extract_info(url, download=False)
         quality_options = []
-        for stream in info_dict.get('formats', []):
-            if 'height' in stream and stream['height']:
+        for stream in info_dict.get("formats", []):
+            if "height" in stream and stream["height"]:
                 quality_options.append(f"{stream['height']}p")
         return sorted(set(quality_options), key=lambda x: int(x[:-1]))
     except yt_dlp.utils.DownloadError as e:
@@ -24,8 +25,10 @@ def get_video_quality_options(url: str):
         logger.error(f"Unexpected error while fetching quality for {url}: {e}")
     return []
 
+
 async def download_and_process_video(video_id: int, url: str, selected_quality: str):
     async with AsyncSessionLocal() as db:
+
         async def mark_failed(message: str):
             await db.rollback()
             video = await db.get(Video, video_id)
@@ -47,21 +50,22 @@ async def download_and_process_video(video_id: int, url: str, selected_quality: 
                 download_path = os.path.join(app_dir, download_path)
             download_path = os.path.normpath(download_path)
             os.makedirs(download_path, exist_ok=True)
-            height = selected_quality.replace('p', '')
+            height = selected_quality.replace("p", "")
 
             ydl_opts = {
-                'outtmpl': os.path.join(download_path, f'{video_id}.%(ext)s'),
-                'format': f'bestvideo[height={height}]+bestaudio/best',
-                'noplaylist': True,
-                'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-                'nocheckcertificate': True,
+                "outtmpl": os.path.join(download_path, f"{video_id}.%(ext)s"),
+                "format": f"bestvideo[height={height}]+bestaudio/best",
+                "noplaylist": True,
+                "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+                "nocheckcertificate": True,
             }
 
             loop = asyncio.get_event_loop()
+
             def download():
                 with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                     info = ydl.extract_info(url, download=True)
-                    return info.get('title'), info.get('duration')
+                    return info.get("title"), info.get("duration")
 
             video_title, video_duration = await loop.run_in_executor(None, download)
 
