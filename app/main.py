@@ -72,9 +72,7 @@ async def start_video_download(
 
 
 @app.get("/videos", response_model=list[VideoSchema])
-async def list_video_jobs(
-    skip: int = 0, limit: int = 10, db: AsyncSession = Depends(get_db)
-):
+async def list_video_jobs(skip: int = 0, limit: int = 10, db: AsyncSession = Depends(get_db)):
     return await get_videos(db, skip=skip, limit=limit)
 
 
@@ -103,9 +101,7 @@ async def download_video_file(job_id: int, db: AsyncSession = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Video file not found on disk.")
 
     video_file = matching_files[0]
-    return FileResponse(
-        path=str(video_file), filename=video_file.name, media_type="video/mp4"
-    )
+    return FileResponse(path=str(video_file), filename=video_file.name, media_type="video/mp4")
 
 
 if __name__ == "__main__":

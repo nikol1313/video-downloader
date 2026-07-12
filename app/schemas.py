@@ -19,12 +19,8 @@ class VideoStatus(str, Enum):
 
 class VideoBase(BaseModel):
     url: HttpUrl
-    quality: Quality = Field(
-        default=Quality.NORMAL, description="Requested video quality"
-    )
-    status: VideoStatus = Field(
-        default=VideoStatus.QUEUED, description="Download job status"
-    )
+    quality: Quality = Field(default=Quality.NORMAL, description="Requested video quality")
+    status: VideoStatus = Field(default=VideoStatus.QUEUED, description="Download job status")
     title: str = Field(min_length=1, max_length=255)
     duration: int | None = Field(default=None, description="Video length in seconds")
     error_message: str | None = Field(default=None, max_length=500)

@@ -17,17 +17,13 @@ class Video(Base):
     title: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
     error_message: Mapped[str | None] = mapped_column(String(500), nullable=True)
     duration: Mapped[int | None] = mapped_column(Integer, nullable=True)
-    created_at: Mapped[datetime | None] = mapped_column(
-        DateTime, server_default=func.now()
-    )
+    created_at: Mapped[datetime | None] = mapped_column(DateTime, server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(
         DateTime, server_default=func.now(), onupdate=func.now()
     )
 
     __table_args__ = (
-        CheckConstraint(
-            "quality IN ('360p', '720p', '1080p')", name="check_quality_values"
-        ),
+        CheckConstraint("quality IN ('360p', '720p', '1080p')", name="check_quality_values"),
         CheckConstraint(
             "status IN ('queued', 'downloading', 'completed', 'failed')",
             name="check_status_values",
