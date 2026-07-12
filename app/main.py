@@ -5,6 +5,7 @@ from pathlib import Path
 from fastapi import BackgroundTasks, Depends, FastAPI, HTTPException
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
+from pydantic import HttpUrl
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import engine, get_db
@@ -46,7 +47,7 @@ async def index():
 
 @app.post("/videos", response_model=VideoSchema)
 async def start_video_download(
-    url: str,
+    url: HttpUrl,
     quality: Quality,
     background_tasks: BackgroundTasks,
     db: AsyncSession = Depends(get_db),
@@ -64,7 +65,7 @@ async def start_video_download(
     background_tasks.add_task(
         download_and_process_video,
         video_id=db_video.id,
-        url=url,
+        url=str(url),
         selected_quality=quality.value,
     )
 

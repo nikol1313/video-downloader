@@ -30,6 +30,7 @@ pythonpath = ["."]
 [tool.ruff]
 line-length = 100
 target-version = "py314"
+extend-exclude = ["requirements.txt"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "N", "W", "UP"]

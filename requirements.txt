@@ -7,5 +7,5 @@ yt-dlp
 asyncpg
 greenlet
 ruff
+mypy
 Black
-
