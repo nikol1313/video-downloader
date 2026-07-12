@@ -1,9 +1,11 @@
-import os
 import asyncio
+import os
+
 import yt_dlp
 from sqlalchemy.exc import SQLAlchemyError
-from app.db_tables import Video
+
 from app.database import AsyncSessionLocal
+from app.db_tables import Video
 from app.log_conf import get_logger
 from app.schemas import VideoStatus
 
@@ -56,7 +58,11 @@ async def download_and_process_video(video_id: int, url: str, selected_quality: 
                 "outtmpl": os.path.join(download_path, f"{video_id}.%(ext)s"),
                 "format": f"bestvideo[height={height}]+bestaudio/best",
                 "noplaylist": True,
-                "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+                "user_agent": (
+                    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                    "AppleWebKit/537.36 (KHTML, like Gecko) "
+                    "Chrome/91.0.4472.124 Safari/537.36"
+                ),
                 "nocheckcertificate": True,
             }
 

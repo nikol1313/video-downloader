@@ -1,7 +1,8 @@
 from sqlalchemy import desc
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from sqlalchemy.exc import SQLAlchemyError
+
 from app.db_tables import Video
 from app.schemas import VideoCreate
 

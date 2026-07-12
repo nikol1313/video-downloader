@@ -1,7 +1,7 @@
-from pydantic import HttpUrl, BaseModel, ConfigDict, Field
-from typing import Optional
-from enum import Enum
 from datetime import datetime
+from enum import Enum
+
+from pydantic import BaseModel, ConfigDict, Field, HttpUrl
 
 
 class Quality(str, Enum):
@@ -26,8 +26,8 @@ class VideoBase(BaseModel):
         default=VideoStatus.QUEUED, description="Download job status"
     )
     title: str = Field(min_length=1, max_length=255)
-    duration: Optional[int] = Field(default=None, description="Video length in seconds")
-    error_message: Optional[str] = Field(default=None, max_length=500)
+    duration: int | None = Field(default=None, description="Video length in seconds")
+    error_message: str | None = Field(default=None, max_length=500)
 
 
 class VideoCreate(VideoBase):

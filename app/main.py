@@ -1,17 +1,17 @@
 import asyncio
 from contextlib import asynccontextmanager
 from pathlib import Path
-from fastapi import FastAPI, Depends, BackgroundTasks, HTTPException
+
+from fastapi import BackgroundTasks, Depends, FastAPI, HTTPException
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy.ext.asyncio import AsyncSession
 
-
-from app.schemas import VideoCreate, VideoSchema, Quality, VideoStatus
+from app.database import engine, get_db
 from app.db_crud import create_video, get_video, get_videos
-from app.service import download_and_process_video
-from app.database import get_db, engine
 from app.db_tables import Base
+from app.schemas import Quality, VideoCreate, VideoSchema, VideoStatus
+from app.service import download_and_process_video
 
 
 @asynccontextmanager
@@ -24,7 +24,7 @@ async def lifespan(app: FastAPI):
             async with engine.begin() as conn:
                 await conn.run_sync(Base.metadata.create_all)
             break
-        except Exception as e:
+        except Exception:
             if attempt == max_retries - 1:
                 raise
             print(f"Database connection failed (attempt {attempt + 1}/{max_retries})")
