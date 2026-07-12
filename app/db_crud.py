@@ -23,17 +23,15 @@ async def get_video(db: AsyncSession, video_id: int) -> Video | None:
     except SQLAlchemyError:
         return None
 
-async def get_videos(db: AsyncSession, skip: int = 0, limit: int = 10) -> list[Video]:
-    try:
-        results = await db.execute(
-            select(Video)
-            .offset(skip)
-            .limit(limit)
-            .order_by(desc(Video.created_at))
-        )
-        return list(results.scalars().all())
-    except SQLAlchemyError:
-        return []
+async def get_videos(
+        db: AsyncSession,
+        skip: int = 0,
+        limit: int = 10) -> list[Video]:
+        try:
+            videos = await db.execute(select(Video).offset(skip).limit(limit).order_by(desc(Video.created_at)))
+            return list(videos.scalars().all())
+        except SQLAlchemyError:
+            return []
 
 async def delete_video(db: AsyncSession, video_id: int) -> bool:
     try:
