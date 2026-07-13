@@ -8,6 +8,7 @@ ENV_FILE = Path(__file__).resolve().parent.parent / ".env"
 class ENV(BaseSettings):
     DATABASE: str = "postgresql+asyncpg://user:password@db:5432/app"
     DATABASE_URL: str | None = None
+    PRODUCTION: bool = True
 
     @property
     def database_url(self) -> str:
