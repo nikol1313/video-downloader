@@ -58,7 +58,9 @@ async def test_start_video_download_creates_job_and_schedules_background_task(
 
     async def fake_create_video(db, video):
         created_payloads.append(video)
-        return make_video(video_id=42, status=video.status, title=video.title, quality=video.quality)
+        return make_video(
+            video_id=42, status=video.status, title=video.title, quality=video.quality
+        )
 
     async def fake_download_and_process_video(**kwargs):
         scheduled_tasks.append(kwargs)
