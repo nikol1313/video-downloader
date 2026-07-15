@@ -1,5 +1,6 @@
 sqlalchemy
 pydantic
+prometheus-fastapi-instrumentator
 uvicorn
 fastapi
 pydantic-settings
