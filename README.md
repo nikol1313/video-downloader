@@ -1,4 +1,4 @@
-# Async Video Downloader
+#Video Downloader
 
 An asynchronous video downloader built with FastAPI, SQLAlchemy, PostgreSQL, and yt-dlp. The project includes a simple web interface for starting downloads and tracking their progress.
 
