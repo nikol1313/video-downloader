@@ -1,6 +1,6 @@
 # Video Downloader
 
-An asynchronous video downloader built with FastAPI, SQLAlchemy, PostgreSQL, and yt-dlp. The project includes a simple web interface for starting downloads and tracking their progress.
+An asynchronous video downloader built with FastAPI, SQLAlchemy, PostgreSQL, and yt-dlp. The project includes a simple web interface for starting downloads and tracking their progress and prometheus + grafana for monitoring.
 
 ## Features
 
@@ -9,6 +9,7 @@ An asynchronous video downloader built with FastAPI, SQLAlchemy, PostgreSQL, and
 * Asynchronous processing with FastAPI background tasks
 * PostgreSQL database for tracking download jobs
 * Simple frontend for submitting download requests and monitoring status
+* Prometheus metrics endpoint for monitoring application health and performance
 * Docker support for easy deployment
 
 ## Installation
