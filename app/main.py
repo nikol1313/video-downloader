@@ -42,7 +42,7 @@ app = FastAPI(
     openapi_url=None if env.PRODUCTION else "/openapi.json",
 )
 
-#prometheus endpoint
+# prometheus endpoint
 Instrumentator().instrument(app).expose(app)
 
 
