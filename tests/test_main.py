@@ -50,6 +50,15 @@ async def test_read_root_serves_index(client: AsyncClient):
 
 
 @pytest.mark.asyncio
+async def test_metrics_endpoint_exposes_prometheus_metrics(client: AsyncClient):
+    response = await client.get("/metrics")
+
+    assert response.status_code == 200
+    assert response.headers["content-type"].startswith("text/plain")
+    assert "http_requests_total" in response.text
+
+
+@pytest.mark.asyncio
 async def test_start_video_download_creates_job_and_schedules_background_task(
     client: AsyncClient, monkeypatch: pytest.MonkeyPatch
 ):
