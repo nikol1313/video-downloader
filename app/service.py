@@ -6,15 +6,56 @@ from sqlalchemy.exc import SQLAlchemyError
 
 from app.database import AsyncSessionLocal
 from app.db_tables import Video
+from app.envpy import env
 from app.log_conf import get_logger
 from app.schemas import VideoStatus
 
 logger = get_logger(__name__)
 
 
+def get_cookies_file() -> str | None:
+    if not env.YTDLP_COOKIES_FILE:
+        return None
+
+    if not os.path.isfile(env.YTDLP_COOKIES_FILE):
+        raise FileNotFoundError("err")
+
+    return env.YTDLP_COOKIES_FILE
+
+
+def build_ydl_opts(
+    *,
+    download_path: str | None = None,
+    video_id: int | None = None,
+    height: str | None = None,
+):
+    ydl_opts = {
+        "quiet": True,
+        "noplaylist": True,
+        "user_agent": (
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+            "AppleWebKit/537.36 (KHTML, like Gecko) "
+            "Chrome/91.0.4472.124 Safari/537.36"
+        ),
+        "nocheckcertificate": True,
+    }
+
+    if download_path is not None and video_id is not None:
+        ydl_opts["outtmpl"] = os.path.join(download_path, f"{video_id}.%(ext)s")
+
+    if height is not None:
+        ydl_opts["format"] = f"bestvideo[height={height}]+bestaudio/best"
+
+    cookies_file = get_cookies_file()
+    if cookies_file:
+        ydl_opts["cookiefile"] = cookies_file
+
+    return ydl_opts
+
+
 def get_video_quality_options(url: str):
     try:
-        with yt_dlp.YoutubeDL({"quiet": True}) as ydl:
+        with yt_dlp.YoutubeDL(build_ydl_opts()) as ydl:
             info_dict = ydl.extract_info(url, download=False)
         quality_options = []
         for stream in info_dict.get("formats", []):
@@ -54,17 +95,11 @@ async def download_and_process_video(video_id: int, url: str, selected_quality: 
             os.makedirs(download_path, exist_ok=True)
             height = selected_quality.replace("p", "")
 
-            ydl_opts = {
-                "outtmpl": os.path.join(download_path, f"{video_id}.%(ext)s"),
-                "format": f"bestvideo[height={height}]+bestaudio/best",
-                "noplaylist": True,
-                "user_agent": (
-                    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-                    "AppleWebKit/537.36 (KHTML, like Gecko) "
-                    "Chrome/91.0.4472.124 Safari/537.36"
-                ),
-                "nocheckcertificate": True,
-            }
+            ydl_opts = build_ydl_opts(
+                download_path=download_path,
+                video_id=video_id,
+                height=height,
+            )
 
             loop = asyncio.get_event_loop()
 
