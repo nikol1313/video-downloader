@@ -1,6 +1,7 @@
 .env
 *.env
 secrets.json
+cookies/
 .venv/
 venv/
 env/
