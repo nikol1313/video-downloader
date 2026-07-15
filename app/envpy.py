@@ -8,7 +8,8 @@ ENV_FILE = Path(__file__).resolve().parent.parent / ".env"
 class ENV(BaseSettings):
     DATABASE: str = "postgresql+asyncpg://user:password@db:5432/app"
     DATABASE_URL: str | None = None
-    PRODUCTION: bool = True
+    PRODUCTION: bool = False
+    YTDLP_COOKIES_FILE: str | None = None
 
     @property
     def database_url(self) -> str:
