@@ -8,10 +8,12 @@ services:
         condition: service_healthy
     environment:
       DATABASE: "postgresql+asyncpg://user:password@db:5432/app"
+      YTDLP_COOKIES_FILE: "/cookies/youtube.txt"
     networks:
       - app-network
     volumes:
       - .:/app
+      - ./cookies:/cookies
 
   db:
     image: postgres:17-alpine
@@ -30,6 +32,19 @@ services:
       interval: 3s
       timeout: 10s
       retries: 5
+
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+    networks:
+      - app-network
+    depends_on:
+      - backend
 
 networks:
   app-network:
