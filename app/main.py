@@ -5,6 +5,7 @@ from pathlib import Path
 from fastapi import BackgroundTasks, Depends, FastAPI, HTTPException
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
+from prometheus_fastapi_instrumentator import Instrumentator
 from pydantic import HttpUrl
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -40,6 +41,9 @@ app = FastAPI(
     redoc_url=None if env.PRODUCTION else "/redoc",
     openapi_url=None if env.PRODUCTION else "/openapi.json",
 )
+
+#prometheus endpoint
+Instrumentator().instrument(app).expose(app)
 
 
 STATIC_DIR = Path(__file__).resolve().parent / "static"
