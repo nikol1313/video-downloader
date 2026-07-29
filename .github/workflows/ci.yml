@@ -1,4 +1,4 @@
-name: ci for my project
+name: ci for my project.
 
 on:
   push:
