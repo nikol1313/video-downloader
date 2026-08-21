@@ -19,3 +19,4 @@ postgres_data/
 .DS_Store
 Thumbs.db
 custom/
+shutter/
