@@ -31,9 +31,6 @@ docker compose up --build
 
 The application will be available at **http://localhost:8080**.
 
-## AI
-
-* The simple static index.html was generated with AI and then integrated into the application, because i have no interest making frontend.
 * AI was used to assist with debugging, troubleshooting during development.
 
 All backend architecture, API design, database integration, Docker configuration, and application logic were implemented by me.
