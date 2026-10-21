@@ -26,18 +26,3 @@ docker compose up --build
 Open **http://localhost:8080**. No `.env` file or database migration command is required for the default Docker setup.
 
 The PostgreSQL data and downloaded files persist in Docker volumes. Stop the application with Ctrl+C.
-
-All ports are bound to `127.0.0.1`. The app has no authentication and downloads any URL it is given, so do not expose it publicly as-is.
-
-## API
-
-| Method | Path | Description |
-| --- | --- | --- |
-| `POST` | `/videos` | Start a download. JSON body: `{ "url": "...", "quality": "720p" }` (`360p`, `720p`, `1080p`, or `audio`) |
-| `GET` | `/videos` | List the 20 most recent jobs |
-| `GET` | `/videos/:id` | Get one job |
-| `GET` | `/videos/:id/file` | Download the finished MP4 or MP3 |
-| `DELETE` | `/videos/:id` | Delete a finished or failed job and its file |
-| `GET` | `/metrics` | Prometheus metrics |
-
-Errors are returned as `{ "error": "..." }`.
