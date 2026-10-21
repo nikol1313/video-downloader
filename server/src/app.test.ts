@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import { after, before, test } from 'node:test'
 import type { Server } from 'node:http'
 import { app } from './app.js'
-import { createJob, pool, prepareDatabase } from './database.js'
+import { createJob, pool, prepareDatabase, updateJob } from './database.js'
 
 let server: Server
 let origin: string
@@ -20,6 +20,10 @@ after(async () => {
   await pool.end()
 })
 
+function post(body: string) {
+  return fetch(`${origin}/videos`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body })
+}
+
 test('serves the React page and metrics', async () => {
   const page = await fetch(origin)
   assert.equal(page.status, 200)
@@ -29,10 +33,15 @@ test('serves the React page and metrics', async () => {
   assert.match(await metrics.text(), /http_requests_total/)
 })
 
-test('validates requests and reads jobs in the existing API shape', async () => {
-  const invalid = await fetch(`${origin}/videos?url=file:///etc/passwd&quality=720p`, { method: 'POST' })
-  assert.equal(invalid.status, 422)
+test('rejects invalid download requests', async () => {
+  assert.equal((await post(JSON.stringify({ url: 'file:///etc/passwd', quality: '720p' }))).status, 422)
+  assert.equal((await post(JSON.stringify({ url: 'https://example.com/video', quality: '4k' }))).status, 422)
+  const malformed = await post('{')
+  assert.equal(malformed.status, 400)
+  assert.ok(((await malformed.json()) as { error?: string }).error)
+})
 
+test('reads jobs and refuses files that are not ready', async () => {
   const job = await createJob('https://example.com/video', '720p')
   try {
     const status = await fetch(`${origin}/videos/${job.id}`)
@@ -45,8 +54,20 @@ test('validates requests and reads jobs in the existing API shape', async () => 
     assert.equal(recent.status, 200)
     assert.ok((await recent.json() as Array<{ id: number }>).some(item => item.id === job.id))
 
-    const file = await fetch(`${origin}/download/${job.id}`)
-    assert.equal(file.status, 400)
+    assert.equal((await fetch(`${origin}/videos/${job.id}/file`)).status, 409)
+    assert.equal((await fetch(`${origin}/videos/abc`)).status, 404)
+  } finally {
+    await pool.query('DELETE FROM videos WHERE id = $1', [job.id])
+  }
+})
+
+test('deletes finished jobs only', async () => {
+  const job = await createJob('https://example.com/song', 'audio')
+  try {
+    assert.equal((await fetch(`${origin}/videos/${job.id}`, { method: 'DELETE' })).status, 409)
+    await updateJob(job.id, 'failed', { error: 'test' })
+    assert.equal((await fetch(`${origin}/videos/${job.id}`, { method: 'DELETE' })).status, 204)
+    assert.equal((await fetch(`${origin}/videos/${job.id}`)).status, 404)
   } finally {
     await pool.query('DELETE FROM videos WHERE id = $1', [job.id])
   }

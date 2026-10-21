@@ -35,11 +35,11 @@ button, input, select { font: inherit; }
 .hero-content { margin: auto 0; padding: 70px 0; max-width: 720px; }
 .hero h1 { font-size: clamp(3.5rem, 9vw, 7rem); line-height: .95; letter-spacing: -.065em; margin: 0; }
 .hero p { font-size: clamp(1rem, 2vw, 1.25rem); line-height: 1.5; max-width: 540px; margin: 28px 0; color: var(--muted); }
-.primary-link { display: inline-block; background: var(--red); color: #fff; padding: 13px 19px; font-weight: 700; text-decoration: none; }
-.primary-link:hover { filter: brightness(.85); }
+.button { display: inline-block; background: var(--red); color: #fff; padding: 13px 19px; font-weight: 700; text-decoration: none; }
+.button:hover { filter: brightness(.85); }
 .step { display: grid; grid-template-columns: 180px 1fr; column-gap: 20px; border-top: 1px solid var(--line); padding: 28px 0 36px; scroll-margin-top: 20px; }
 .step h2 { font-size: 1.08rem; letter-spacing: -.02em; margin: 0; }
-.step > form, .step > p, .step > .checkbox, .step > .notice, .step > .details, .step > .job-list, .step > button { grid-column: 2; }
+.step > form, .step > p, .step > .notice, .step > .job-list { grid-column: 2; }
 .step > p { margin: 0 0 14px; color: var(--muted); font-size: .9rem; }
 form { display: grid; grid-template-columns: 1fr 180px; gap: 8px 16px; }
 label { font-size: .84rem; font-weight: 600; }
@@ -48,23 +48,20 @@ label[for="quality"] { grid-column: 2; grid-row: 1; }
 input:not([type="checkbox"]), select { width: 100%; min-height: 44px; border: 1px solid var(--line); background: var(--surface); color: var(--text); padding: 10px; border-radius: 0; }
 button { justify-self: start; background: var(--red); color: #fff; border: 1px solid var(--red); padding: 11px 17px; margin-top: 14px; cursor: pointer; font-weight: 700; }
 button:hover { filter: brightness(.85); }
+button:disabled { opacity: .6; cursor: progress; }
 button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible { outline: 3px solid #002fa7; outline-offset: 2px; }
+.notice { padding: 12px 14px; margin: 16px 0 0; border-left: 4px solid var(--red); background: var(--soft); overflow-wrap: anywhere; }
+.job-list { list-style: none; padding: 0; margin: 0; border-top: 1px solid var(--line); }
+.job { display: grid; grid-template-columns: 60px 1fr auto; align-items: center; gap: 12px; padding: 13px 0; border-bottom: 1px solid var(--line); }
+.job strong { color: var(--red); }
+.job-title { display: block; overflow-wrap: anywhere; }
+.job small { display: block; margin-top: 4px; font-size: .82rem; color: var(--muted); }
+.job .job-error { color: var(--red); overflow-wrap: anywhere; }
+.job progress { display: block; width: 100%; height: 6px; margin-top: 8px; accent-color: var(--red); }
+.job-actions { display: flex; gap: 8px; }
+.job-actions .button, .job-actions button { margin: 0; padding: 9px 14px; font-size: .85rem; }
 .secondary { background: transparent; color: var(--red); }
-.secondary:hover { background: var(--soft); }
-.checkbox { display: flex; align-items: center; gap: 8px; margin-top: 18px; font-weight: 400; }
-.checkbox input { accent-color: var(--red); }
-.notice { padding: 12px 14px; margin: 16px 0 0; border-left: 4px solid var(--muted); background: var(--soft); overflow-wrap: anywhere; }
-.notice--error { border-color: var(--red); }
-.notice--success { border-color: #1b754a; }
-.details { display: grid; grid-template-columns: 100px 1fr; gap: 10px 16px; margin: 18px 0 0; padding: 18px; background: var(--soft); border: 1px solid var(--line); font-size: .9rem; }
-.details dt { color: var(--muted); }
-.details dd { margin: 0; overflow-wrap: anywhere; }
-.job-list { list-style: none; padding: 0; margin: 16px 0 0; border-top: 1px solid var(--line); }
-.job-list li { border-bottom: 1px solid var(--line); }
-.job-list button { display: grid; grid-template-columns: 80px 1fr auto; gap: 12px; width: 100%; margin: 0; padding: 13px 0; text-align: left; background: transparent; color: var(--text); border: 0; font-weight: 400; }
-.job-list button:hover { background: var(--soft); }
-.job-list strong { color: var(--red); }
-.job-list small { font-size: .82rem; color: var(--muted); }
+.secondary:hover { background: var(--soft); filter: none; }
 
 @media (max-width: 700px) {
   .page { padding: 0 18px 64px; }
@@ -72,8 +69,8 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   .step h2 { margin-bottom: 20px; }
   form { grid-template-columns: 1fr; }
   label[for="quality"] { grid-column: 1; grid-row: auto; }
-  .job-list button { grid-template-columns: 55px 1fr; gap: 6px; }
-  .job-list small { grid-column: 2; }
+  .job { grid-template-columns: 45px 1fr; }
+  .job-actions { grid-column: 2; }
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -19,7 +19,7 @@ WORKDIR /app
 COPY server/package*.json ./server/
 RUN cd server && npm ci --omit=dev
 COPY --from=server-build /build/server/dist ./server/dist
-COPY --from=frontend-build /build/app/static ./app/static
+COPY --from=frontend-build /build/server/public ./server/public
 RUN mkdir -p downloads
 EXPOSE 8080
 CMD ["node", "server/dist/index.js"]

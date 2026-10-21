@@ -2,7 +2,7 @@ services:
   backend:
     build: .
     ports:
-      - "${APP_PORT:-8080}:8080"
+      - "127.0.0.1:${APP_PORT:-8080}:8080"
     depends_on:
       db:
         condition: service_healthy
@@ -22,7 +22,7 @@ services:
       POSTGRES_PASSWORD: password
       POSTGRES_DB: app
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5432:5432"
     networks:
       - app-network
     volumes:
@@ -34,9 +34,9 @@ services:
       retries: 5
 
   prometheus:
-    image: prom/prometheus:latest
+    image: prom/prometheus:v3.5.0
     ports:
-      - "9090:9090"
+      - "127.0.0.1:9090:9090"
     volumes:
       - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
     command:

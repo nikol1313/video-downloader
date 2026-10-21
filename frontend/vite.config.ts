@@ -1,17 +1,13 @@
 import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
 
-export default defineConfig(({ command, mode }) => {
+export default defineConfig(({ mode }) => {
   const apiPort = loadEnv(mode, '.', 'API_PORT').API_PORT || '8080'
   return {
     plugins: [react()],
-    base: command === 'serve' ? '/' : '/static/',
-    build: { outDir: '../app/static', emptyOutDir: true },
+    build: { outDir: '../server/public', emptyOutDir: true },
     server: {
-      proxy: {
-        '/videos': `http://localhost:${apiPort}`,
-        '/download': `http://localhost:${apiPort}`,
-      },
+      proxy: { '/videos': `http://localhost:${apiPort}` },
     },
   }
 })
