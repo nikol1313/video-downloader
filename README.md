@@ -24,12 +24,4 @@ docker compose up --build
 
 Open **http://localhost:8080**. No `.env` file or database migration command is required for the default Docker setup.
 
-If port 8080 is in use, run `APP_PORT=8081 docker compose up --build` and open **http://localhost:8081**.
-
-For sites that require login, put a cookies file at `cookies/youtube.txt` and add this optional line to `.env`:
-
-```env
-YTDLP_COOKIES_FILE=/cookies/youtube.txt
-```
-
 The PostgreSQL data and downloaded files persist in Docker volumes. Stop the application with Ctrl+C.
