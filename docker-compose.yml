@@ -2,18 +2,18 @@ services:
   backend:
     build: .
     ports:
-      - "8080:8080"
+      - "${APP_PORT:-8080}:8080"
     depends_on:
       db:
         condition: service_healthy
     environment:
-      DATABASE: "postgresql+asyncpg://user:password@db:5432/app"
-      YTDLP_COOKIES_FILE: "/cookies/youtube.txt"
+      DATABASE_URL: "postgresql://user:password@db:5432/app"
+      YTDLP_COOKIES_FILE: ${YTDLP_COOKIES_FILE:-}
     networks:
       - app-network
     volumes:
-      - .:/app
-      - ./cookies:/cookies
+      - downloads:/app/downloads
+      - ./cookies:/cookies:ro
 
   db:
     image: postgres:17-alpine
@@ -52,3 +52,4 @@ networks:
 
 volumes:
   postgres-data:
+  downloads:

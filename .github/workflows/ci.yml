@@ -1,58 +1,42 @@
-name: ci for my project.
+name: CI
 
-on:
-  push:
+on: [push, pull_request]
 
 jobs:
-  lint:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.14'
-      - name: Install dependencies
-        run: pip install -r requirements.txt
-      - name: Run ruff
-        run: ruff check .
-      - name: Run ruff formatter
-        run: ruff format --check .
-
-  type-check:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.14'
-      - name: Install dependencies
-        run: pip install -r requirements.txt
-      - name: Run mypy
-        run: mypy app/
-
-  test:
+  build-and-test:
     runs-on: ubuntu-latest
     services:
       postgres:
-        image: postgres:16
+        image: postgres:17-alpine
         env:
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: test_db
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
+          POSTGRES_USER: user
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: app
         ports:
           - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U user -d app"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-node@v4
         with:
-          python-version: '3.14'
-      - name: Install dependencies
-        run: pip install -r requirements.txt
-      - name: Run tests
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: |
+            frontend/package-lock.json
+            server/package-lock.json
+      - run: npm ci
+        working-directory: frontend
+      - run: npm run build
+        working-directory: frontend
+      - run: npm ci
+        working-directory: server
+      - run: npm run build
+        working-directory: server
+      - run: npm test
+        working-directory: server
         env:
-          DATABASE_URL: postgresql+asyncpg://postgres:postgres@localhost:5432/test_db
-        run: pytest -v
+          DATABASE_URL: postgresql://user:password@localhost:5432/app

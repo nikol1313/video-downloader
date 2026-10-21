@@ -1,0 +1,8 @@
+.git
+**/node_modules
+**/dist
+**/tsconfig.tsbuildinfo
+app/static
+downloads
+.env
+cookies
