@@ -1,6 +1,6 @@
 # Video Downloader
 
-An asynchronous video downloader built with Node.js, Express, TypeScript, PostgreSQL, and yt-dlp. The React and TypeScript web interface starts downloads and tracks their progress. FFmpeg combines video and audio, and Prometheus collects application metrics.
+An asynchronous video downloader built with Node.js, Express, TypeScript, PostgreSQL, and yt-dlp library. The React and TypeScript web interface starts downloads and tracks their progress. FFmpeg combines video and audio, and Prometheus collects application metrics.
 
 ![Video Downloader demo](docs/demo.gif)
 
@@ -15,7 +15,7 @@ An asynchronous video downloader built with Node.js, Express, TypeScript, Postgr
 - Expose Prometheus metrics at `/metrics`
 - Run the app with Docker Compose
 
-## Why there is no live demo
+## Why i didnt host it:
 
 This app is meant to run locally and is intentionally not hosted. Downloading from YouTube and many other sites is against their terms of service, and a public instance would let anyone use the server to download any content, including copyrighted material. Video sites also block downloads from cloud servers. The demo above shows the app running locally.
 
@@ -29,6 +29,6 @@ Build and start the application:
 docker compose up --build
 ```
 
-Open **http://localhost:8080**. No `.env` file or database migration command is required for the default Docker setup.
+Open **http://localhost:8080**
 
-The PostgreSQL data and downloaded files persist in Docker volumes. Stop the application with Ctrl+C.
+Stop the application with Ctrl+C.
