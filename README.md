@@ -15,6 +15,10 @@ An asynchronous video downloader built with Node.js, Express, TypeScript, Postgr
 - Expose Prometheus metrics at `/metrics`
 - Run the app with Docker Compose
 
+## Why there is no live demo
+
+This app is meant to run locally and is intentionally not hosted. Downloading from YouTube and many other sites is against their terms of service, and a public instance would let anyone use the server to download any content, including copyrighted material. Video sites also block downloads from cloud servers. The demo above shows the app running locally.
+
 ## Installation
 
 ### Using Docker
