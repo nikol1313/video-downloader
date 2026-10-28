@@ -1,6 +1,6 @@
 # Video Downloader
 
-An asynchronous video downloader built with Node.js, Express, TypeScript, PostgreSQL, and yt-dlp library. The React and TypeScript web interface starts downloads and tracks their progress. FFmpeg combines video and audio, and Prometheus collects application metrics.
+An asynchronous video downloader built with Node.js, Express, TypeScript, PostgreSQL. The React and TypeScript web interface starts downloads and tracks their progress. Prometheus collects application metrics.
 
 ![Video Downloader demo](docs/demo.gif)
 
